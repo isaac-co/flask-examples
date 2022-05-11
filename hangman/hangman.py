@@ -4,6 +4,14 @@ import requests
 app = Flask(__name__)
 app.secret_key = "key"
 
+# TODO:
+# - Always lowercase 
+# - JSX for Game Over in hangman.html
+# - End game when word is guessed
+# - End game after 6 tries
+# - Do not change image if one try was successful
+# - New game (pop session variables)
+
 def showWord(used_list, word):
     ans = []
     word_list = []
@@ -32,15 +40,15 @@ def init():
 
 @app.route('/hangman/', methods=['POST'])
 def hangman():
+    session['tries'] += 1
     if session['tries'] < 6:
-        session['tries'] += 1
         session['used'].append(request.form.get('letter', None))
         # Format
         word = showWord(session['used'],session['word'])
         used = ' '.join(session['used'])
         return render_template('hangman.html', spaces=word, used=used, tries=session["tries"])
     used = ' '.join(session['used'])
-    return render_template('hangman.html', spaces='perdiste', used=used, tries=6)
+    return render_template('hangman.html', spaces='Game over', used=used, tries=6)
     
 
 if __name__ == '__main__':
