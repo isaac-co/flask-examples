@@ -20,7 +20,6 @@ def successful(letter, word):
         return True
     return False
 
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -36,27 +35,41 @@ def init():
     used = ' '.join(session['used'])
     return render_template('hangman.html', spaces=spaces, used=used, tries=session["tries"])
 
+@app.route('/random')
+def random():
+    res = requests.get('https://random-word-api.herokuapp.com/word')
+    res.encoding = 'utf-8'
+    session['word'] = res.json()[0]
+    session['used'] = []
+    session['tries'] = 0
+    session['won'] = None
+    # Format
+    spaces = '_ ' * len(session['word'])
+    used = ' '.join(session['used'])
+    return render_template('hangman.html', spaces=spaces, used=used, tries=session["tries"])
+
 @app.route('/hangman/', methods=['POST'])
 def hangman():
     letter = request.form.get('letter', None).lower()
     # Letter already in used
     if letter in ''.join(session['used']):
-        print('xd')
+        used = ' '.join(session['used'])
+        word = showWord(session['used'],session['word'])
+        return render_template('hangman.html', spaces=word, used=used, tries=session["tries"], won=session['won'])
 
     # Add letter to used letters 
     _used = list()
     _used = session['used'].copy()
     _used.append(letter)
-    session['used'] = _used
-
-    # If letter is not part of the word add 1 to counter
-    if not letter in session['word']:
-        session['tries'] += 1
+    session['used'] = list(set(_used))
 
     # Format
     used = ' '.join(session['used'])
     word = showWord(session['used'],session['word'])
 
+    # If letter is not part of the word add 1 to counter
+    if not letter in session['word']:
+        session['tries'] += 1
     if not '_' in word: # Win
         session['won'] = True
         return render_template('hangman.html', spaces=word, used=used, tries=session['tries'], won=session['won'])

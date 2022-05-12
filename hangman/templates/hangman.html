@@ -17,7 +17,7 @@
     <div class="row">
       <div class="col">
         {% if tries < 6 and won != True %}
-          <h1 class="display-4">Guess the word: {{ spaces }}</h1>
+          <h1 class="display-4">Guess the word: <br>{{ spaces }}</h1>
           <form action="/hangman/" method="post" style="margin-top: 2rem;">
           <div class="form-floating mb-3">
               <input type="text" maxlength="1" class="form-control" id="letter" placeholder="" name="letter" onkeydown="return /[a-z]/i.test(event.key)" required="required">
@@ -26,14 +26,14 @@
           <button type="submit" class="btn btn-success">Play!</button>
         {% endif %}
         {% if tries >= 6%}
-        <h1 class="display-4" style="color: red;">Game over! WEML</h1>
+        <h1 class="display-4" style="color: red;">Game over!</h1>
         <h1 class="display-4">The word was: {{ spaces }}</h1>
-        <a href="/newgame" class="btn btn-warning">Replay</a>
+        <a href="/newgame" class="btn btn-warning btn-lg">Replay</a>
         {% endif %}
         {% if won == True %}
         <h1 class="display-4" style="color: green;">You won!</h1>
         <h1 class="display-4">The word was: {{ spaces }}</h1>
-        <a href="/newgame" class="btn btn-warning">Replay</a>
+        <a href="/newgame" class="btn btn-warning btn-lg">Replay</a>
         {% endif %}
       </form>
       </div>
@@ -42,7 +42,7 @@
       </div>
       {% if used|length > 0 %}
       <div class="row">
-        <h1 class="display-4" style="margin-top: -5rem;">Used letters: </h1>
+        <h1 class="display-4" style="margin-top: -2.5rem;">Used letters: </h1>
         <h1 class="display-4" style="color: blue;">{{ used }}</h1>
       </div>
       {% endif %}
