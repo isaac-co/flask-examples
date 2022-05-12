@@ -4,14 +4,6 @@ import requests
 app = Flask(__name__)
 app.secret_key = "key"
 
-# TODO:
-# - Always lowercase DONE
-# - JSX for Game Over in hangman.html
-# - End game when word is guessed
-# - End game after 6 tries
-# - Do not change image if one try was successful
-# - New game (pop session variables)
-
 def showWord(used_list, word):
     ans = []
     word_list = []
@@ -23,6 +15,11 @@ def showWord(used_list, word):
             ans.append('_')
     return ' '.join(ans)
 
+def successful(letter, word):
+    if letter in word:
+        return True
+    return False
+
 
 @app.route('/')
 def index():
@@ -33,6 +30,7 @@ def init():
     session['word'] = request.form.get('word', None).lower()
     session['used'] = []
     session['tries'] = 0
+    session['won'] = None
     # Format
     spaces = '_ ' * len(session['word'])
     used = ' '.join(session['used'])
@@ -40,16 +38,40 @@ def init():
 
 @app.route('/hangman/', methods=['POST'])
 def hangman():
-    # if unsuccessful:
-    session['tries'] += 1
-    session['used'].append(request.form.get('letter', None).lower())
+    letter = request.form.get('letter', None).lower()
+    # Letter already in used
+    if letter in ''.join(session['used']):
+        print('xd')
+
+    # Add letter to used letters 
+    _used = list()
+    _used = session['used'].copy()
+    _used.append(letter)
+    session['used'] = _used
+
+    # If letter is not part of the word add 1 to counter
+    if not letter in session['word']:
+        session['tries'] += 1
+
     # Format
-    word = showWord(session['used'],session['word'])
     used = ' '.join(session['used'])
-    if session['tries'] < 6:
-        return render_template('hangman.html', spaces=word, used=used, tries=session["tries"])
-    return render_template('hangman.html', spaces='Game over', used=used, tries=6)
-    
+    word = showWord(session['used'],session['word'])
+
+    if not '_' in word: # Win
+        session['won'] = True
+        return render_template('hangman.html', spaces=word, used=used, tries=session['tries'], won=session['won'])
+    if session['tries'] < 6: # Continue game
+        return render_template('hangman.html', spaces=word, used=used, tries=session["tries"], won=session['won'])
+    # Lose
+    return render_template('hangman.html', spaces=session['word'], used=used, tries=6, won=session['won'])
+
+@app.route("/newgame")
+def nuevo_juego():
+    session.pop("word", None)
+    session.pop("used", None)
+    session.pop("tries", None)
+    session.pop("won", None)
+    return redirect("/")    
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
