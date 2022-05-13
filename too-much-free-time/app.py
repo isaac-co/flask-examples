@@ -1,4 +1,5 @@
 from flask import Flask, render_template, redirect
+from bs4 import BeautifulSoup
 import requests
 import random
 
@@ -20,6 +21,32 @@ def randomAnime():
     if not anime_info['desc'] is None:
         anime_info['desc'] = res.json()['data'][0]['descriptions']['en'].replace('<br>', "")
     return anime_info
+
+def randomMovie():
+    res = requests.get('https://k2maan-moviehut.herokuapp.com/api/random')
+    res = res.json()
+    movie = {}
+    movie['title'] = res['name']
+    movie['year'] = res['releaseYear']
+    movie['duration'] = res['runtime']
+    movie['genres'] = res['genre']
+    movie['rating'] = res['imdbRating']
+    movie['score'] = res['metaScore']
+    movie['director'] = res['director']
+    movie['desc'] = res['overview']
+    return movie
+
+def scrapeIMDB(movie_title):
+    search = requests.get(f'https://www.imdb.com/search/title/?title={movie_title}')
+    soup = BeautifulSoup(search.content, 'html.parser')
+    link = soup.find('div', class_='lister-item-content').find('a').get('href')
+    page = requests.get(f'https://www.imdb.com{link}')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    img = soup.find('div', class_='ipc-poster ipc-poster--baseAlt ipc-poster--dynamic-width sc-bc5f13ed-0 eCJjuc celwidget ipc-sub-grid-item ipc-sub-grid-item--span-2').find('a').get('href')
+    page = requests.get(f'https://www.imdb.com/{img}')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    img = soup.find('div', class_='sc-7c0a9e7c-2 bkptFa').find('img').get('src')
+    return link, img
 
 def randomActivity():
     res = requests.get('https://www.boredapi.com/api/activity/')
@@ -49,13 +76,22 @@ def startup():
     act['activity'] = res
     return render_template('random.html', act=act)
     
-@app.route('/cocktail')
-def cocktail():
-    return redirect('https://www.thecocktaildb.com/api/json/v1/1/random.php')
+@app.route('/movie')
+def movie():
+    movie = randomMovie()
+    link, img = scrapeIMDB(movie['title'])
+    movie['link'] = link
+    movie['cover'] = img
+    print(movie)
+    return render_template('movie.html', movie=movie)
+
+@app.route('/game')
+def game():
+    return redirect('https://word-game-better-than-wordle.herokuapp.com/')
 
 @app.route('/random')
 def random_route():
-    choices = ['anime','activity','startup','cocktail']
+    choices = ['anime','activity','startup','movie','game']
     link = random.choice(choices)
     return redirect(f'/{link}')
 
