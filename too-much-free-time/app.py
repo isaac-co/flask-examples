@@ -82,7 +82,6 @@ def movie():
     link, img = scrapeIMDB(movie['title'])
     movie['link'] = link
     movie['cover'] = img
-    print(movie)
     return render_template('movie.html', movie=movie)
 
 @app.route('/game')
