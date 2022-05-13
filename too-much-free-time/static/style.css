@@ -1,0 +1,24 @@
+body {
+    background-color: rgb(216, 216, 216);
+}
+
+.container-fluid {
+    margin-left: 10rem;
+    margin-right: 10rem;
+    margin-top: 2.5rem;
+}
+
+.row {
+    margin-top: 1rem;
+}
+
+.btn {
+    margin-right: 1rem;
+    width: auto !important;
+}
+
+.list-group-item {
+    background-color: transparent;
+    font-size: 35px;
+}
+
